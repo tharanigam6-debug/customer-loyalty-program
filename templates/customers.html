@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Customers{% endblock %}
+{% block page_title %}Customers{% endblock %}
+
+{% block content %}
+<div class="grid grid-2">
+
+  <div class="card">
+    <div class="section-title">
+      <span class="icon icon-blue"><svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M12 12a4.8 4.8 0 1 0 0-9.6 4.8 4.8 0 0 0 0 9.6zm0 2.4c-3.6 0-9.6 1.8-9.6 5.4V22h19.2v-2.2c0-3.6-6-5.4-9.6-5.4z"/></svg></span>
+      <h2>All Customers</h2>
+    </div>
+    {% if customers %}
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>ID</th><th>Name</th><th>Email</th><th>Tier</th><th>Points</th><th>Status</th><th></th></tr>
+        </thead>
+        <tbody>
+          {% for c in customers %}
+          <tr>
+            <td>{{ c.customer_id }}</td>
+            <td>{{ c.first_name }} {{ c.last_name }}</td>
+            <td>{{ c.email }}</td>
+            <td><span class="badge badge-{{ c.membership_tier|lower }}">{{ c.membership_tier }}</span></td>
+            <td>{{ balances.get(c.customer_id, 0) }}</td>
+            <td>{{ 'Active' if c.is_active else 'Inactive' }}</td>
+            <td>
+              {% if c.is_active %}
+              <form method="post" action="{{ url_for('deactivate_customer', customer_id=c.customer_id) }}">
+                <button class="btn btn-outline" style="padding:6px 12px; font-size:12.5px;" type="submit">Deactivate</button>
+              </form>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state">No customers yet — register your first one.</div>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <div class="section-title">
+      <span class="icon icon-blue"><svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M12 12a4.8 4.8 0 1 0 0-9.6 4.8 4.8 0 0 0 0 9.6zm0 2.4c-3.6 0-9.6 1.8-9.6 5.4V22h19.2v-2.2c0-3.6-6-5.4-9.6-5.4z"/></svg></span>
+      <h2>Customer Registration</h2>
+    </div>
+    <form method="post">
+      <div class="field-row">
+        <div class="field">
+          <label for="first_name">First Name</label>
+          <input type="text" id="first_name" name="first_name" placeholder="Enter first name" required>
+        </div>
+        <div class="field">
+          <label for="last_name">Last Name</label>
+          <input type="text" id="last_name" name="last_name" placeholder="Enter last name">
+        </div>
+      </div>
+      <div class="field">
+        <label for="phone">Phone Number</label>
+        <input type="tel" id="phone" name="phone" placeholder="Enter phone number">
+      </div>
+      <div class="field">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" placeholder="Enter email address" required>
+      </div>
+      <div class="field">
+        <label for="address">Address</label>
+        <textarea id="address" name="address" placeholder="Enter address"></textarea>
+      </div>
+      <button type="submit" class="btn btn-green btn-block">Register Customer</button>
+    </form>
+  </div>
+
+</div>
+{% endblock %}

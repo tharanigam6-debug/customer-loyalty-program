@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="grid grid-4" style="margin-bottom: 20px;">
+  <div class="stat-card stat-blue">
+    <div class="stat-icon"><svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 12a4.8 4.8 0 1 0 0-9.6 4.8 4.8 0 0 0 0 9.6zm0 2.4c-3.6 0-9.6 1.8-9.6 5.4V22h19.2v-2.2c0-3.6-6-5.4-9.6-5.4z"/></svg></div>
+    <div class="stat-label">Total Customers</div>
+    <div class="stat-value">{{ total_customers }}</div>
+    <a class="stat-link" href="{{ url_for('customers') }}">View Details →</a>
+  </div>
+  <div class="stat-card stat-green">
+    <div class="stat-icon"><svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M7 4h13l-1.5 8.5a2 2 0 0 1-2 1.5H8.6a2 2 0 0 1-2-1.6L5 3H2V1h4l.3 2H7zm.7 3l1 5h8.7l.9-5H7.7zM7 18a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm10 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/></svg></div>
+    <div class="stat-label">Total Purchases</div>
+    <div class="stat-value">{{ total_purchases }}</div>
+    <a class="stat-link" href="{{ url_for('purchases') }}">View Details →</a>
+  </div>
+  <div class="stat-card stat-amber">
+    <div class="stat-icon"><svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 2l2.6 5.8L21 9l-4.5 4.4L17.6 20 12 16.9 6.4 20l1.1-6.6L3 9l6.4-1.2L12 2z"/></svg></div>
+    <div class="stat-label">Total Reward Points</div>
+    <div class="stat-value">{{ total_points_earned }}</div>
+    <a class="stat-link" href="{{ url_for('rewards') }}">View Details →</a>
+  </div>
+  <div class="stat-card stat-purple">
+    <div class="stat-icon"><svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M20 6h-4V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2H4a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h1v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-9h1a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1zM10 4h4v2h-4V4z"/></svg></div>
+    <div class="stat-label">Redeemed Points</div>
+    <div class="stat-value">{{ total_points_redeemed }}</div>
+    <a class="stat-link" href="{{ url_for('reports') }}">View Details →</a>
+  </div>
+</div>
+
+<div class="grid grid-2">
+  <div class="card">
+    <h2>Purchases Overview (Last 30 Days)</h2>
+    <canvas id="purchaseChart" height="230"></canvas>
+  </div>
+
+  <div class="card">
+    <h2>Recent Purchases</h2>
+    {% if recent_purchases %}
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>ID</th><th>Customer</th><th>Amount</th><th>Points</th><th>Date</th></tr>
+        </thead>
+        <tbody>
+          {% for p in recent_purchases %}
+          <tr>
+            <td>{{ p.purchase_id }}</td>
+            <td>{{ p.first_name }} {{ p.last_name }}</td>
+            <td>{{ currency }}{{ '%.2f'|format(p.purchase_amount) }}</td>
+            <td>{{ p.points_earned }}</td>
+            <td>{{ p.purchase_date }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state">No purchases recorded yet.</div>
+    {% endif %}
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script>
+const ctx = document.getElementById('purchaseChart');
+new Chart(ctx, {
+  type: 'line',
+  data: {
+    labels: {{ chart_labels|tojson }},
+    datasets: [{
+      label: 'Purchase amount ({{ currency }})',
+      data: {{ chart_values|tojson }},
+      borderColor: '#2f6fed',
+      backgroundColor: 'rgba(47, 111, 237, 0.12)',
+      fill: true,
+      tension: 0.35,
+      pointRadius: 0,
+      borderWidth: 2
+    }]
+  },
+  options: {
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { display: false }, ticks: { maxTicksLimit: 8, color: '#6b7280', font: { size: 11 } } },
+      y: { grid: { color: '#eef0f6' }, ticks: { color: '#6b7280', font: { size: 11 } } }
+    }
+  }
+});
+</script>
+{% endblock %}

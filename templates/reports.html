@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Reports{% endblock %}
+{% block page_title %}Reports{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="section-title">
+    <span class="icon icon-blue"><svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M6 2h9l5 5v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z"/></svg></span>
+    <h2>Reports</h2>
+  </div>
+
+  <div class="tabs">
+    <a class="tab {{ 'active' if view=='purchases' }}" href="{{ url_for('reports', view='purchases', customer_id=selected_customer_id) }}">Purchase History</a>
+    <a class="tab {{ 'active' if view=='rewards' }}" href="{{ url_for('reports', view='rewards', customer_id=selected_customer_id) }}">Reward History</a>
+  </div>
+
+  <form method="get" class="filter-row">
+    <input type="hidden" name="view" value="{{ view }}">
+    <div class="field">
+      <label for="customer_id">Select Customer</label>
+      <select id="customer_id" name="customer_id" onchange="this.form.submit()">
+        <option value="">All Customers</option>
+        {% for c in customers %}
+        <option value="{{ c.customer_id }}" {{ 'selected' if selected_customer_id == c.customer_id }}>{{ c.first_name }} {{ c.last_name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </form>
+
+  {% if view == 'purchases' %}
+    {% if purchase_rows %}
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>ID</th><th>Customer</th><th>Product</th><th>Qty</th><th>Amount</th><th>Points</th><th>Date</th></tr>
+        </thead>
+        <tbody>
+          {% for p in purchase_rows %}
+          <tr>
+            <td>{{ p.purchase_id }}</td>
+            <td>{{ p.first_name }} {{ p.last_name }}</td>
+            <td>{{ p.product_name or '—' }}</td>
+            <td>{{ p.quantity }}</td>
+            <td>{{ currency }}{{ '%.2f'|format(p.purchase_amount) }}</td>
+            <td>{{ p.points_earned }}</td>
+            <td>{{ p.purchase_date }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state">No purchases found.</div>
+    {% endif %}
+
+  {% else %}
+    {% if redemption_rows %}
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>ID</th><th>Customer</th><th>Reward</th><th>Points Redeemed</th><th>Value</th><th>Date</th></tr>
+        </thead>
+        <tbody>
+          {% for r in redemption_rows %}
+          <tr>
+            <td>{{ r.redemption_id }}</td>
+            <td>{{ r.first_name }} {{ r.last_name }}</td>
+            <td>{{ r.reward_name or 'Custom redemption' }}</td>
+            <td>{{ r.points_redeemed }}</td>
+            <td>{{ currency }}{{ '%.2f'|format(r.reward_value) if r.reward_value is not none else '—' }}</td>
+            <td>{{ r.redemption_date }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state">No redemptions found.</div>
+    {% endif %}
+  {% endif %}
+
+  <form method="post" action="{{ url_for('run_expire_points') }}" style="margin-top: 20px;">
+    <button type="submit" class="btn btn-outline">Run Points Expiration (Maintenance)</button>
+  </form>
+</div>
+{% endblock %}

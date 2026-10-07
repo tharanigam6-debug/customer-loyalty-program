@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}Purchases{% endblock %}
+{% block page_title %}Purchases{% endblock %}
+
+{% block content %}
+<div class="grid grid-2">
+
+  <div class="card">
+    <div class="section-title">
+      <span class="icon icon-green"><svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M7 4h13l-1.5 8.5a2 2 0 0 1-2 1.5H8.6a2 2 0 0 1-2-1.6L5 3H2V1h4l.3 2H7zm.7 3l1 5h8.7l.9-5H7.7zM7 18a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm10 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/></svg></span>
+      <h2>Purchase Tracking</h2>
+    </div>
+    <form method="post" id="purchaseForm">
+      <div class="field">
+        <label for="customer_id">Customer</label>
+        <select id="customer_id" name="customer_id" required>
+          <option value="" disabled selected>Select customer</option>
+          {% for c in customers %}
+          <option value="{{ c.customer_id }}">{{ c.first_name }} {{ c.last_name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="field">
+        <label for="product_id">Product</label>
+        <select id="product_id" name="product_id" required>
+          <option value="" disabled selected>Select product</option>
+          {% for p in products %}
+          <option value="{{ p.product_id }}" data-price="{{ p.price }}">{{ p.product_name }} ({{ currency }}{{ '%.2f'|format(p.price) }})</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="field">
+        <label for="quantity">Quantity</label>
+        <input type="number" id="quantity" name="quantity" min="1" value="1" placeholder="Enter quantity" required>
+      </div>
+
+      <div class="total-box">
+        <div>
+          <div class="label">Total Amount</div>
+          <div class="value" id="totalAmount">{{ currency }}0.00</div>
+        </div>
+        <div>
+          <div class="label">Reward Points</div>
+          <div class="value points-value" id="totalPoints">
+            <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M12 2l2.6 5.8L21 9l-4.5 4.4L17.6 20 12 16.9 6.4 20l1.1-6.6L3 9l6.4-1.2L12 2z"/></svg>
+            0
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-green btn-block">Complete Purchase</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <div class="section-title">
+      <span class="icon icon-green"><svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M6 2h9l5 5v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z"/></svg></span>
+      <h2>Recent Purchases</h2>
+    </div>
+    {% if recent_purchases %}
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>ID</th><th>Customer</th><th>Product</th><th>Qty</th><th>Amount</th><th>Points</th></tr>
+        </thead>
+        <tbody>
+          {% for p in recent_purchases %}
+          <tr>
+            <td>{{ p.purchase_id }}</td>
+            <td>{{ p.first_name }} {{ p.last_name }}</td>
+            <td>{{ p.product_name or '—' }}</td>
+            <td>{{ p.quantity }}</td>
+            <td>{{ currency }}{{ '%.2f'|format(p.purchase_amount) }}</td>
+            <td>{{ p.points_earned }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state">No purchases recorded yet.</div>
+    {% endif %}
+  </div>
+
+</div>
+
+<script>
+const productSelect = document.getElementById('product_id');
+const qtyInput = document.getElementById('quantity');
+const totalAmountEl = document.getElementById('totalAmount');
+const totalPointsEl = document.getElementById('totalPoints');
+const currency = "{{ currency }}";
+
+function recalc() {
+  const opt = productSelect.options[productSelect.selectedIndex];
+  const price = opt ? parseFloat(opt.dataset.price || 0) : 0;
+  const qty = parseInt(qtyInput.value || '0', 10) || 0;
+  const total = price * qty;
+  const points = Math.floor(total / 10);
+  totalAmountEl.textContent = currency + total.toFixed(2);
+  totalPointsEl.innerHTML = totalPointsEl.querySelector('svg').outerHTML + ' ' + points;
+}
+productSelect.addEventListener('change', recalc);
+qtyInput.addEventListener('input', recalc);
+</script>
+{% endblock %}

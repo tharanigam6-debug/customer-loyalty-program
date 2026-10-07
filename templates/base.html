@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}Dashboard{% endblock %} · Loyalty Rewards</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<div class="layout">
+
+  <aside class="sidebar">
+    <div class="brand">
+      <span class="brand-mark">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 2l2.6 5.8L21 9l-4.5 4.4L17.6 20 12 16.9 6.4 20l1.1-6.6L3 9l6.4-1.2L12 2z" fill="currentColor"/></svg>
+      </span>
+      <span class="brand-text">Loyalty Rewards<br><small>System</small></span>
+    </div>
+
+    <nav class="nav">
+      <a href="{{ url_for('dashboard') }}" class="nav-link {{ 'active' if active=='dashboard' }}">
+        <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M3 11l9-8 9 8h-2v9a1 1 0 0 1-1 1h-4v-6H10v6H6a1 1 0 0 1-1-1v-9H3z"/></svg>
+        <span>Dashboard</span>
+      </a>
+      <a href="{{ url_for('customers') }}" class="nav-link {{ 'active' if active=='customers' }}">
+        <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M12 12a4.8 4.8 0 1 0 0-9.6 4.8 4.8 0 0 0 0 9.6zm0 2.4c-3.6 0-9.6 1.8-9.6 5.4V22h19.2v-2.2c0-3.6-6-5.4-9.6-5.4z"/></svg>
+        <span>Customers</span>
+      </a>
+      <a href="{{ url_for('products') }}" class="nav-link {{ 'active' if active=='products' }}">
+        <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M21 8l-9-5-9 5 9 5 9-5zm-9 7L3 10v6l9 5 9-5v-6l-9 5z"/></svg>
+        <span>Products</span>
+      </a>
+      <a href="{{ url_for('purchases') }}" class="nav-link {{ 'active' if active=='purchases' }}">
+        <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M7 4h13l-1.5 8.5a2 2 0 0 1-2 1.5H8.6a2 2 0 0 1-2-1.6L5 3H2V1h4l.3 2H7zm.7 3l1 5h8.7l.9-5H7.7zM7 18a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm10 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/></svg>
+        <span>Purchases</span>
+      </a>
+      <a href="{{ url_for('rewards') }}" class="nav-link {{ 'active' if active=='rewards' }}">
+        <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M12 2l2.6 5.8L21 9l-4.5 4.4L17.6 20 12 16.9 6.4 20l1.1-6.6L3 9l6.4-1.2L12 2z"/></svg>
+        <span>Rewards</span>
+      </a>
+      <a href="{{ url_for('reports') }}" class="nav-link {{ 'active' if active=='reports' }}">
+        <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M6 2h9l5 5v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1zm8 1.5V8h4.5L14 3.5zM8 13h8v1.6H8V13zm0 3.4h8V18H8v-1.6zM8 9.6h4v1.6H8V9.6z"/></svg>
+        <span>Reports</span>
+      </a>
+    </nav>
+
+    <a href="{{ url_for('logout') }}" class="nav-link logout">
+      <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M10 3a1 1 0 0 1 1 1v2a1 1 0 1 1-2 0V5H5v14h4v-1a1 1 0 1 1 2 0v2a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h6zm4.3 5.3a1 1 0 0 1 1.4 0l3.3 3.3a1 1 0 0 1 0 1.4l-3.3 3.3a1 1 0 1 1-1.4-1.4l1.6-1.6H9a1 1 0 1 1 0-2h6.9l-1.6-1.6a1 1 0 0 1 0-1.4z"/></svg>
+      <span>Logout</span>
+    </a>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <h1>{% block page_title %}Dashboard{% endblock %}</h1>
+      <div class="topbar-user">
+        <span>Welcome, Admin</span>
+        <span class="avatar">A</span>
+      </div>
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-stack">
+          {% for category, message in messages %}
+            <div class="flash flash-{{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <main class="content">
+      {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+      Customer Loyalty &amp; Rewards System &nbsp;|&nbsp; Python Flask &nbsp;|&nbsp; MySQL
+    </footer>
+  </div>
+</div>
+</body>
+</html>

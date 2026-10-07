@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}Rewards{% endblock %}
+{% block page_title %}Rewards{% endblock %}
+
+{% block content %}
+<div class="grid grid-2">
+
+  <div class="card">
+    <div class="section-title">
+      <span class="icon icon-amber"><svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M12 2l2.6 5.8L21 9l-4.5 4.4L17.6 20 12 16.9 6.4 20l1.1-6.6L3 9l6.4-1.2L12 2z"/></svg></span>
+      <h2>Customer Rewards</h2>
+    </div>
+
+    <form method="get" action="{{ url_for('rewards') }}" style="margin-bottom: 20px;">
+      <div class="field">
+        <label for="lookup_customer">Customer</label>
+        <select id="lookup_customer" name="customer_id" onchange="this.form.submit()">
+          <option value="" {{ 'selected' if not selected_customer }}>Select customer</option>
+          {% for c in customers %}
+          <option value="{{ c.customer_id }}" {{ 'selected' if selected_customer and selected_customer.customer_id == c.customer_id }}>
+            {{ c.first_name }} {{ c.last_name }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+    </form>
+
+    {% if selected_customer %}
+    <div class="field">
+      <label>Customer Name</label>
+      <div style="font-size:16px; font-weight:600; padding: 6px 0 12px;">{{ selected_customer.first_name }} {{ selected_customer.last_name }}</div>
+    </div>
+
+    <div class="total-box">
+      <div>
+        <div class="label">Available Points</div>
+        <div class="value points-value">
+          <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M12 2l2.6 5.8L21 9l-4.5 4.4L17.6 20 12 16.9 6.4 20l1.1-6.6L3 9l6.4-1.2L12 2z"/></svg>
+          {{ balance }}
+        </div>
+      </div>
+    </div>
+
+    <form method="post" id="redeemForm">
+      <input type="hidden" name="customer_id" value="{{ selected_customer.customer_id }}">
+      <input type="hidden" name="action" value="redeem">
+      <div class="field">
+        <label for="points">Redeem Points</label>
+        <input type="number" id="points" name="points" min="1" max="{{ balance }}" placeholder="Enter points to redeem" required>
+      </div>
+
+      <div class="reward-value-box">
+        <div class="label">Reward Value</div>
+        <div class="value" id="rewardValue">{{ currency }}0.00</div>
+      </div>
+
+      <button type="submit" class="btn btn-purple btn-block">Redeem Reward</button>
+    </form>
+    <p style="font-size:12.5px; color: var(--text-muted); margin-top: 10px;">
+      {{ redemption_rate }} points = {{ currency }}1. Oldest, soonest-to-expire points are redeemed first.
+    </p>
+
+    <script>
+      const pointsInput = document.getElementById('points');
+      const rewardValueEl = document.getElementById('rewardValue');
+      const rate = {{ redemption_rate }};
+      const currency = "{{ currency }}";
+      pointsInput.addEventListener('input', () => {
+        const pts = parseInt(pointsInput.value || '0', 10) || 0;
+        rewardValueEl.textContent = currency + (pts / rate).toFixed(2);
+      });
+    </script>
+    {% else %}
+    <div class="empty-state">Select a customer to view their available points and redeem rewards.</div>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <div class="section-title">
+      <span class="icon icon-amber"><svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M20 12a8 8 0 1 1-8-8"/><path stroke="currentColor" stroke-width="2" fill="none" d="M20 12a8 8 0 1 1-8-8" stroke-linecap="round"/></svg></span>
+      <h2>Reward Catalog</h2>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Reward</th><th>Description</th><th>Points Required</th></tr></thead>
+        <tbody>
+          {% for r in catalog %}
+          <tr>
+            <td>{{ r.reward_name }}</td>
+            <td>{{ r.description }}</td>
+            <td>{{ r.points_required }} pts</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="3" class="empty-state">No catalog rewards defined.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <p style="font-size:12.5px; color: var(--text-muted); margin-top: 14px;">
+      This reference catalog shares the same {{ currency }} conversion as the freeform redemption above.
+    </p>
+  </div>
+
+</div>
+{% endblock %}
